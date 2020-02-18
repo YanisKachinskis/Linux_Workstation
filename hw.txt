@@ -1,0 +1,83 @@
+Lesson 1.
+"""
+1. Создать Ркпозиторий в GitHub
+2. Установить Virtualbox, установить Ubuntu.
+3. Установить утилиты для гостевой ОС вручную и написать команды для
+-- монтирование оптического диска с guest additions
+-- запуска установки virtualbox гостевых дополнений
+-- установка недостоющих зависимостей gcc make perl
+
+4. В конфигурации виртуальной машины включить "общий буфер". Заменить NAT сетевой интерфейс на Bridged (либо на Windows добавить еще один internal интерфейс)
+5. Настроить ssh соединение с хостовой ОС на гостевую ОС с использованием ssh ключа и написать команды для:
+-- установки ssh сервер
+-- открытие справки для команды ufw
+-- включение службы ssh сервера
+-- добавления порта 22 в исключения фаервола
+-- генерации ssh ключа
+
+6. * https://github.com/mtuktarov/linux_stuff/blob/master/lecture_1.MD
+Примечание. Задания 6 дано для тех, кому упражнений 1-5 показалось недостаточно.
+"""
+
+Все команды выполнены после ввода sudo -s.
+
+1. Создал репозиторий https://github.com/YanisKachinskis/Linux_Workstation
+
+2. Установил VMWare Workstation Player 15
+
+3. VMWare tools уже были установленны в процессе инсталляции Ubuntu.
+root@ubuntu:~# apt search open-vm-tools-desktop
+Sorting... Done
+Full Text Search... Done
+open-vm-tools-desktop/bionic-updates,now 2:11.0.1-2ubuntu0.18.04.2 amd64 [installed]
+  Open VMware Tools for virtual machines hosted on VMware (GUI)
+  
+4. Опять же никакие донастройки не понадобились. VMware все сделал сам. Настройка сети выставлена как NAT.
+На реальной машине с ОС Windows 10 был создан дополнительный виртуальный интерфейс. Связанность между машниами на Win и Ubuntu есть.
+
+5. 
+--	apt-get install openssh-server
+		
+--	man ufw
+
+--	systemctl start sshd
+
+--	ufw enable
+	ufw allow ssh
+	ufw status verbose
+	Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere                  
+22/tcp (v6)                ALLOW IN    Anywhere (v6)    
+
+--	ssh-keygen
+	добавил приватный ключ в путти, а публичный внес в ~/.ssh/authorized_keys
+	Подключение происходит без пароля.
+
+6.1
+Задаем пароль руту: passwd root
+Правим конфигурационный файл: /etc/ssh/sshd_config
+Выствляем значение: PermitRootLogin yes
+Перезапускаем службу: systemctl restart sshd
+
+6.2
+Создаем файл с баннером, например:
+nano /etc/ssh/sshd-banner
+в него сохраняем сообщение
+В /etc/ssh/sshd_config
+раскомментируем строку: Banner /etc/ssh/sshd-banner
+Перезапускаем службу: systemctl restart sshd
+
+
+
+	
+
+
+
+  
+
