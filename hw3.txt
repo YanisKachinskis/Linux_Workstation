@@ -1,0 +1,92 @@
+Lesson 3.
+"""
+1. Создать файл file1 и наполнить его произвольным содержимым. Скопировать его в file2. 
+Создать символическую ссылку file3 на file1. Создать жесткую ссылку file4 на file1. Посмотреть, 
+какие айноды у файлов. Удалить file1. Что стало с остальными созданными файлами? Попробовать вывести их на экран.
+2. Дать созданным файлам другие, произвольные имена. Создать новую символическую ссылку. 
+Переместить ссылки в другую директорию.
+3. Создать два произвольных файла. Первому присвоить права на чтение, запись для владельца и 
+группы, только на чтение для всех. Второму присвоить права на чтение, запись только для владельца. 
+Сделать это в численном и символьном виде.
+4. Создать пользователя, обладающего возможностью выполнять действия от имени суперпользователя.
+5. * Создать группу developer, несколько пользователей, входящих в эту группу. 
+Создать директорию для совместной работы. Сделать так, чтобы созданные одними пользователями 
+файлы могли изменять другие пользователи этой группы.
+6. * Создать в директории для совместной работы поддиректорию для обмена файлами, но чтобы 
+удалять файлы могли только их создатели.
+7. * Создать директорию, в которой есть несколько файлов. Сделать так, чтобы открыть файлы можно 
+только, зная имя файла, а через ls список файлов посмотреть нельзя.
+Примечание. Задания с 5 по 7 даны для тех, кому упражнений 1-4 показалось недостаточно.
+"""
+
+1.
+root@ubuntu:~# cat file1 
+File with random text
+
+cp file1 file2
+
+ln -s file1 file3
+ln file1 file4
+
+i-node одинаковые у file1 и file4. После удаления file1 символическая ссылка file3 перестала работать.
+file4 по прежнему открывается с тем же содержимым, как и file2.
+
+2.
+root@ubuntu:~# mv file4 sergey
+root@ubuntu:~# mv file3 anton
+root@ubuntu:~# mv file2 ivan
+
+ln -s sergey semen
+mv semen tmp/
+После перемещения симлической ссылки в другую папку она перестала открывать целевой файл,
+mv sergey tmp/
+но после переноса целевого файла в ту же папку все снова заработало.
+С жесткой ссылкой таких проблем не было.
+
+3.
+root@ubuntu:~# touch file1
+root@ubuntu:~# touch file2
+
+root@ubuntu:~# chmod 664 file1
+root@ubuntu:~# chmod 600 file2
+
+root@ubuntu:~# chmod ug+rw,o+r file1
+root@ubuntu:~# chmod u+rw,go-r file2
+
+4.
+root@ubuntu:~# adduser new_user
+Adding user `new_user' ...
+Adding new group `new_user' (1001) ...
+Adding new user `new_user' (1001) with group `new_user' ...
+Creating home directory `/home/new_user' ...
+Copying files from `/etc/skel' ...
+Enter new UNIX password: 
+Retype new UNIX password: 
+passwd: password updated successfully
+
+root@ubuntu:~# usermod -aG sudo new_user
+Проверка прав:
+su new_user
+sudo -s
+
+5*.
+root@ubuntu:~# groupadd developer
+
+root@ubuntu:~# adduser user1
+root@ubuntu:~# adduser user2
+
+root@ubuntu:~# usermod -aG developer user1
+root@ubuntu:~# usermod -aG developer user2
+
+mkdir /opt/developers
+chown -R root:developer /opt/developers/
+chmod g+ws /opt/developers/
+После этого пользователи этой группы создают файлы с группой developer,
+соответственно могут изменять файлы друг друга. Проверено через 
+su user1
+su user2
+
+
+
+
+
