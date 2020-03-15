@@ -1,0 +1,53 @@
+Lesson 5.
+"""
+2. Определеить, какие ошибки записывается в /var/log/auth.log при попытке неудачной 
+аутентификации пользователя для ssh подключения, для подключения через терминал - 
+ctrl+alt+f3 и для подключения с помощью виртуального терминала (gui приложения). 
+Сделать скрипт мониторинга лога /var/log/auth.log на наличие этих событий, который 
+выводит сообщения о попытке неудачной аутентификации на экран. Проверить скрипт, 
+выполнив ошибочную регистрацию с терминала, с помощью виртуального терминала и через 
+ssh. Скрипт должен выводить информацию о том, как его использовать.
+"""
+__________________________________________________________________________________________
+
+#!/bin/bash
+usage(){
+    cat <<EOF
+This program displays messages on failed attempts to log into OS.
+Exit: ^C
+Usage: $0 [option]
+Oprions: --help
+Examples:
+   $0
+   $0 --help
+EOF
+}
+if [[ $1 == '--help' ]]
+then
+        usage
+else
+        while true; do
+                lines=$(cat /var/log/auth.log | wc -l) 
+                sleep 10
+                lines_new=$(cat /var/log/auth.log | wc -l)
+				
+                if [ $lines -lt $lines_new ]
+                then
+                        diff=$[lines_new-lines]
+                        #echo $diff
+                        tail -$diff /var/log/auth.log | grep -P '^.*authentication failure;.*$'
+                else
+                        continue
+
+                fi
+        done
+fi
+
+
+_________________________________________________________________________________________
+
+kyerd@ubuntu:~/scripts$ ./script2.sh
+Mar  4 21:25:45 ubuntu gdm-password]: pam_unix(gdm-password:auth): authentication failure; logname= uid=0 euid=0 tty=/dev/tty1 ruser= rhost=  user=kyerd
+Mar  4 21:26:02 ubuntu sshd[21621]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.174.1  user=user2
+Mar  4 21:26:19 ubuntu login[20748]: pam_unix(login:auth): authentication failure; logname=LOGIN uid=0 euid=0 tty=/dev/tty3 ruser= rhost=  user=user1
+

@@ -1,0 +1,19 @@
+Lesson 5.
+"""
+1. Написать скрипт, который удаляет из текстового файла пустые строки и заменяет маленькие 
+символы на большие (воспользуйтесь tr или sed). Скрипт должен выводить информацию о том, 
+как его использовать.
+"""
+__________________________________________________________________________________________
+
+#!/bin/bash
+usage(){
+    cat <<EOF
+This program delete empty lines from file and change lowercase letters to uppercase letters. 
+Usage: $0 [file]
+EOF
+}
+
+[[ $# == 0 ]] && usage
+[[ -f $1 ]] && sed '/^$/d' $1 > out.txt && tr [:lower:] [:upper:] < out.txt > final.txt && \
+ rm out.txt

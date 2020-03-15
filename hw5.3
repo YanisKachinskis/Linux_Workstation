@@ -1,0 +1,58 @@
+Lesson 5.
+"""
+3. Написать скрипт, который в указанной с помощью параметра -d директории создает указанные 
+файлы. Если файлы уже существуют, то выводится предупреждения на экран. Если указано 
+несколько директорий, то выводится ошибка с соответствующей информацией. Созданным файлам, 
+которые имеют разрешения '.sh' нужно дать права на выполнения. Скрипт должен выводить 
+информацию о том, как его использовать и понятные сообщения об ошибках. Примеры запуска:
+
+./script.sh -d /tmp/task_3
+./script.sh -d file1 file2 file3
+./script.sh -d /tmp/task_3 file1 file2.sh file3
+./script.sh -d /tmp/task_3 -d /tmp/task_3_2 file1 file2.sh file3
+"""
+__________________________________________________________________________________________
+
+#!/bin/bash
+
+usage(){
+    cat <<EOF
+This program create files in specified directory.
+Usage: $0 [option] [directory] [file(s)]
+Options:
+    -d - specified directory
+Examples:
+    $0 --help
+    $0 -d /tmp/task_3
+    $0 -d /tmp/task_3 file1 file2
+EOF
+}
+
+
+if [ $1 == '--help' ] && [ $# == '1' ]
+then
+        usage
+        exit 0
+elif [ $1 == '-d' ] && [ -d $2 ] && [ -n "$3" ] && [[ $3 != -* ]]
+then
+        directory=$2
+        shift
+        shift
+        while [[ $# -gt 0 ]]
+        do
+                [[ -f $directory/$1 ]] && echo File $1 already exsits && shift && continue
+                if [[ $1 == *.sh ]]
+                then
+                        touch $directory/$1
+                        chmod +x $directory/$1
+                        shift
+                else
+                        touch $directory/$1
+                        shift
+                fi
+        done
+else
+        echo Inapplopriate argumnets. Try "$0 --help" for more information.
+        exit 1
+fi
+
