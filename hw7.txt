@@ -1,0 +1,53 @@
+Lesson 7.
+"""
+1. Написать Dockerfile для сборки образа, который будет запускать контейнер с django
+ приложением, доуступным по ссылке: https://github.com/mtuktarov/linux_stuff/tree/master/django-test-app.
+ Для запуска приложения использовать команду python manage.py runserver 0.0.0.0:8000, 
+ где manage.py - это файл из репозитория.
+2. Зная, что в этом приложении django хранит базу в файле db.sqlite3, нужно избавиться от 
+ошибки, которая появится при старте:
+You have 15 unapplied migration(s). Your project may not work properly until you apply the migrations for 
+app(s): admin, auth, contenttypes, polls, sessions.
+Run 'python manage.py migrate' to apply them.
+3. Запустить контейнер так, чтобы приложение было доступным из браузера Ubuntu, используя Ubuntu hostname.
+4. Создать аккаунт на Dockerhub и залить туда образ. Указать имя образа.
+"""
+
+1. 
+FROM python:alpine
+
+COPY /django-test-app/  /opt/django-test-app/
+WORKDIR /opt/django-test-app
+COPY /django-test-app/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+RUN rm -rf /tmp/requirements.txt
+
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+______________________________________________________________
+
+root@ubuntu:~# docker build -t django .
+.
+.
+.
+Successfully built a9bfe972ad44
+Successfully tagged django:latest
+
+2. 
+python3 manage.py migrate - решает вопрос с миграцией
+
+3.
+docker run -p 80:8000 -ti django:latest
+hostname у меня по-умолчанию ubuntu (он же localhost), по имени открывает страничку джанго
+
+4.
+docker login
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: kyerd	
+Password:
+
+docker tag django:useless kyerd/django:useless #было отказано в доступе, когда отпралял без тега с моим ником
+docker push kyerd/django:useless
+
+https://hub.docker.com/r/kyerd/django
+
+
