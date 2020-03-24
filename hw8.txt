@@ -44,7 +44,7 @@ module = main
 callable = app
 
 socket = /opt/socket/flaskapp.sock
-
+chmod-socket = 664
 
 
 
