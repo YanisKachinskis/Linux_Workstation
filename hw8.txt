@@ -35,16 +35,33 @@ RUN chmod +x /opt/flaskapp.py
 RUN rm -rf /tmp/requirements.txt
 
 CMD ["uwsgi", "--ini", "wsgi.ini"]
+------------------------------------------------------------------------------------
+wsgi.py:
+
+from flaskapp import app
+
+if __name__=="__main__":
+    app.run()
 
 ----------------------------------------------------------------------------------
 wsgi.ini:
 
 [uwsgi]
-module = wsgi
+module = wsgi    
 callable = app
-
+vacuum = true
+master = true
+thunder-lock = 1
+enable-threads = 1
+single-interpreter = 1
+master = 1
+no-orphans = 1
+lazy-apps = 1
+memory-report = 1
+ignore-write-errors = 1
 socket = /opt/socket/flaskapp.sock
-chmod-socket = 664
+chmod-socket = 777
+
 
 
 
