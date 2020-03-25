@@ -40,7 +40,7 @@ CMD ["uwsgi", "--ini", "wsgi.ini"]
 wsgi.ini:
 
 [uwsgi]
-module = main
+module = wsgi
 callable = app
 
 socket = /opt/socket/flaskapp.sock
