@@ -1,0 +1,83 @@
+Lesson 8.
+"""
+ Самостоятельно разобраться с настройкой uwsgi и запустить flaskapp
+ (https://github.com/mtuktarov/linux_stuff/tree/gunicorn/docker), либо djangoapp 
+ (https://github.com/mtuktarov/linux_stuff/tree/gunicorn/django-test-app), 
+ используя uwsgi в конейнере за nginx'ом, заупущенным также в контейнере. 
+ Пример настройки uwsgi можно найти здесь https://github.com/mtuktarov/mtuktarov.ru
+"""
+
+------------------------------------------------------------------
+Dockerfile:
+
+FROM python:alpine                                                                                  $
+
+COPY flaskapp.py  /opt/flaskapp.py
+COPY wsgi.py /opt/wsgi.py
+WORKDIR /opt/
+COPY requirements.txt /tmp/requirements.txt
+COPY wsgi.ini /opt/wsgi.ini
+RUN apk add --no-cache \
+    python3 \
+    bash \
+    nginx \
+    uwsgi \
+    uwsgi-python3 \
+    supervisor && \
+    python3 -m ensurepip && \
+    rm -r /usr/lib/python*/ensurepip && \
+    pip3 install --upgrade pip setuptools && \
+    pip3 install -r /tmp/requirements.txt && \
+    rm /etc/nginx/conf.d/default.conf && \
+    rm -r /root/.cache
+RUN pip install -r /tmp/requirements.txt
+RUN chmod +x /opt/flaskapp.py
+RUN rm -rf /tmp/requirements.txt
+
+CMD ["uwsgi", "--ini", "wsgi.ini"]
+------------------------------------------------------------------------------------
+wsgi.py:
+
+from flaskapp import app
+
+if __name__=="__main__":
+    app.run()
+
+----------------------------------------------------------------------------------
+wsgi.ini:
+
+[uwsgi]
+module = wsgi    
+callable = app
+vacuum = true
+master = true
+thunder-lock = 1
+enable-threads = 1
+single-interpreter = 1
+master = 1
+no-orphans = 1
+lazy-apps = 1
+memory-report = 1
+ignore-write-errors = 1
+socket = /opt/socket/flaskapp.sock
+chmod-socket = 777
+
+
+
+
+---------------------------------------------------------------------------------------
+flaskapp.conf:
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ubuntu;
+    location / {
+        proxy_pass http://unix:/socket/flaskapp.sock;
+    }
+}
+----------------------------------------------------------------------------------------
+
+docker build . -t flask:latest
+docker run --rm --hostname flaskapp --name flaskapp -ti -v $(pwd)/socket:/opt/socket flask:latest
+docker run -ti -v $(pwd)/socket:/socket -v $(pwd)/flaskapp.conf:/etc/nginx/conf.d/flaskapp.conf -p 80:80 nginx:alpine
